@@ -1,0 +1,73 @@
+version: '3'
+services:
+  airflow:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "5000:8080"
+    volumes:
+      - D:\work_from_home\Airflow\dags:/opt/airflow/dags
+      - D:\work_from_home\Airflow\plugins:/opt/airflow/plugins
+    environment:
+      - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql+psycopg2://postgres:1234@host.docker.internal:5432/airflow_db
+      - AIRFLOW__WEBSERVER__SECRET_KEY=samesecret1234
+      - AIRFLOW__CORE__DAGS_FOLDER=/opt/airflow/dags
+      - AIRFLOW__CORE__PLUGINS_FOLDER=/opt/airflow/plugins
+      - AIRFLOW__SMTP__SMTP_HOST=smtp.gmail.com
+      - AIRFLOW__SMTP__SMTP_USER=watchara.c.lee@gmail.com
+      - AIRFLOW__SMTP_SMTP_MAIL_FROM=watchara.c.lee@gmail.com
+      - AIRFLOW__SMTP__SMTP_PASSWORD=benjjtufjbugqkhw
+      - AIRFLOW__SMTP__SMTP_PORT=465
+    command: ["airflow", "webserver"]  # Start Airflow webserver
+
+  scheduler:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - D:\work_from_home\Airflow\dags:/opt/airflow/dags
+      - D:\work_from_home\Airflow\plugins:/opt/airflow/plugins
+    environment:
+      - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql+psycopg2://postgres:1234@host.docker.internal:5432/airflow_db
+      - AIRFLOW__WEBSERVER__SECRET_KEY=samesecret1234
+      - AIRFLOW__CORE__DAGS_FOLDER=/opt/airflow/dags
+      - AIRFLOW__CORE__PLUGINS_FOLDER=/opt/airflow/plugins
+      - AIRFLOW__SMTP__SMTP_HOST=smtp.gmail.com
+      - AIRFLOW__SMTP__SMTP_USER=watchara.c.lee@gmail.com
+      - AIRFLOW__SMTP_SMTP_MAIL_FROM=watchara.c.lee@gmail.com
+      - AIRFLOW__SMTP__SMTP_PASSWORD=benjjtufjbugqkhw
+      - AIRFLOW__SMTP__SMTP_PORT=465
+    command: ["airflow", "scheduler"]
+
+  jupyter:
+    image: jupyter/base-notebook
+    ports:
+      - "8888:8888"
+    volumes:
+      - D:\work_from_home\Airflow\dags:/home/jovyan/work/dags
+    environment:
+      JUPYTER_ENABLE_LAB: "yes"
+    command: "start-notebook.sh --NotebookApp.token=''"
+
+  # zookeeper:
+  #   image: 'bitnami/zookeeper:latest'
+  #   ports:
+  #     - "2181:2181"
+  #   environment:
+  #     - ALLOW_ANONYMOUS_LOGIN=yes
+
+  # kafka:
+  #   image: 'bitnami/kafka:latest'
+  #   ports:
+  #     - "9092:9092"
+  #   environment:
+  #     - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
+  #     - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092
+  #     - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://localhost:9092
+  #     - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=PLAINTEXT:PLAINTEXT
+  #     - KAFKA_CFG_BROKER_ID=1
+  #     - KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE=true
+  #     - ALLOW_PLAINTEXT_LISTENER=yes
+  #   depends_on:
+  #     - zookeeper

@@ -1,0 +1,1 @@
+from blueprints.api_custom import get_message

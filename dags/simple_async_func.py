@@ -1,8 +1,8 @@
-from airflow import DAG
+from airflow.decorators import dag, task
+from airflow.models.baseoperator import chain
 from airflow.utils.dates import days_ago
 from airflow.operators.python import get_current_context
-from operators__c.async_python_operator__c import AsyncPythonOperator__c
-import asyncio
+from operators__c.async_python_operator__c import AsyncPythonOperator__c, AsyncPythonOperatorTask__c as task_async
 
 # Define an async function to use with the operator
 async def async_function_a(*args: list, **kwargs: dict) -> None:
@@ -28,6 +28,11 @@ async def async_function_b() -> None:
         print("Retrieved Transformed Arguments:", transformed_args)
         print("Retrieved Transformed Keyword Arguments:", transformed_kwargs)
 
+@task_async.async_task
+async def async_function_c() -> None:
+    # Pull data from XCom
+    print('Can use @task with async task')
+
 default_args = {
     'owner': 'airflow',
     'start_date': days_ago(1),
@@ -35,7 +40,10 @@ default_args = {
     'depends_on_past': True
 }
 
-with DAG('async_operator_dag', default_args=default_args, schedule_interval=None) as dag:
+@dag(
+    'async_operator_dag', default_args=default_args, schedule_interval=None
+)
+def main() -> None:
     async_task_a = AsyncPythonOperator__c(
         task_id='async_task_a',
         python_callable=async_function_a,
@@ -48,4 +56,7 @@ with DAG('async_operator_dag', default_args=default_args, schedule_interval=None
         python_callable=async_function_b,
     )
 
-    async_task_a >> async_task_b # Define task dependencies
+    async_function_c_task = async_function_c()
+
+    chain(async_task_a , async_task_b, async_function_c_task)
+main()

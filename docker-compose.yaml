@@ -1,16 +1,16 @@
-version: '3'
 services:
   airflow:
     build:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "5000:8080"
+      - "5000:5000"
     volumes:
-      - D:\work_from_home\Airflow\dags:/opt/airflow/dags
-      - D:\work_from_home\Airflow\plugins:/opt/airflow/plugins
+      - ./dags:/opt/airflow/dags
+      - ./plugins:/opt/airflow/plugins
       - ./init-scripts/airflow:/opt/airflow/init-scripts
     environment:
+      - AIRFLOW__WEBSERVER__WEB_SERVER_PORT=5000
       - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql+psycopg2://postgres:1234@postgres:5432/airflow_db
       - AIRFLOW__WEBSERVER__SECRET_KEY=samesecret1234
       - AIRFLOW__CORE__DAGS_FOLDER=/opt/airflow/dags
@@ -25,16 +25,16 @@ services:
         condition: service_healthy
     command: >
       bash -c "
-        airflow webserver &
-    
-        # Check if the webserver is up before creating the admin user
-        while ! curl -s http://localhost:8080/health | grep -q 'healthy'; do
-          echo 'Waiting for Airflow webserver...'
-          sleep 5
-        done
-    
+        /bin/bash /opt/airflow/init-scripts/init_database.sh
         /bin/bash /opt/airflow/init-scripts/create_admin_user.sh
-
+        /bin/bash /opt/airflow/init-scripts/start_webserver.sh
+    
+        # # Check if the webserver is up before creating the admin user
+        # while ! curl -s http://localhost:5000/health | grep -q 'healthy'; do
+        #   echo '>>>>>>>>>>>>>>>>>>>>>>>> Waiting for Airflow webserver...'
+        #   sleep 2
+        # done
+        
         wait -n
 
         tail -f /dev/null
@@ -45,8 +45,8 @@ services:
       context: .
       dockerfile: Dockerfile
     volumes:
-      - D:\work_from_home\Airflow\dags:/opt/airflow/dags
-      - D:\work_from_home\Airflow\plugins:/opt/airflow/plugins
+      - ./dags:/opt/airflow/dags
+      - ./plugins:/opt/airflow/plugins
     environment:
       - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql+psycopg2://postgres:1234@postgres:5432/airflow_db
       - AIRFLOW__WEBSERVER__SECRET_KEY=samesecret1234
@@ -62,36 +62,79 @@ services:
         condition: service_healthy
     command: ["airflow", "scheduler"]
 
+  spark:
+    image: bitnami/spark:latest
+    ports:
+      - "8080:8080"  # Spark web UI
+    environment:
+      - SPARK_MODE=master
+      - ALLOW_EMPTY_PASSWORD=yes
+    volumes:
+      - ./spark/pyspark:/opt/bitnami/spark/work/pyspark
+      - ./spark/config:/opt/bitnami/spark/work/config
+
   jupyter:
     image: jupyter/base-notebook
     ports:
       - "8888:8888"
     volumes:
-      - D:\work_from_home\Airflow\dags:/home/jovyan/work/dags
+      - ./dags:/home/jovyan/work/dags
+      - ./spark/pyspark:/home/jovyan/work/pyspark
+      - ./spark/config:/home/jovyan/work/config
     environment:
       JUPYTER_ENABLE_LAB: "yes"
     command: "start-notebook.sh --NotebookApp.token=''"
 
   postgres:
     image: postgres:13
-    container_name: airflow_postgres
+    container_name: postgres
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: 1234
       POSTGRES_DB: airflow_db
     ports:
-      - "5433:5432"  # Mapping local port 5433 to container port 5432
+      - "5432:5432"  # Mapping local port 5433 to container port 5432
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./init-scripts/postgres:/docker-entrypoint-initdb.d
+      - ./init-scripts/postgres/airflow:/docker-entrypoint-initdb.d
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 10s
       timeout: 5s
       retries: 5
 
+  mock_postgres:
+    image: postgres:13
+    container_name: mock_postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 1234
+      POSTGRES_DB: mock_db
+      PGPORT: 5433
+    ports:
+      - "5433:5433"  # Mapping local port 5433 to container port 5432
+    volumes:
+      - mock_postgres_data:/var/lib/postgresql/data
+      - ./init-scripts/postgres/postgres:/docker-entrypoint-initdb.d
+
+  ubuntu:
+    build:
+      context: .
+      dockerfile: Dockerfile.ubuntu
+    container_name: ubuntu_port_tunnel
+    tty: true   # Allows interactive sessions with the container
+    stdin_open: true  # Keeps the container open for interaction
+    volumes:
+      - ./ngrok_config:/root/.config/ngrok
+    command: > 
+      bash -c "
+        ngrok start --all
+      "
+    network_mode: "host"
+
 volumes:
   postgres_data:
+  mock_postgres_data:
 
 
   # zookeeper:

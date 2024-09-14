@@ -1,0 +1,13 @@
+version: "3"
+agent:
+    authtoken: 26dfrN3XATzc0Wg1EpalZQNICKQ_7qpmDbGDwRNQPBvYeSyya
+tunnels:
+  airflow_webserver:
+    proto: http
+    addr: 5000
+  spark_webserver:
+    proto: http
+    addr: 8080
+  jupyter:
+    proto: http
+    addr: 8888

@@ -56,7 +56,9 @@ def main() -> None:
         python_callable=async_function_b,
     )
 
-    async_function_c_task = async_function_c()
-
-    chain(async_task_a , async_task_b, async_function_c_task)
+    # async_function_c_task = async_function_c()
+    # wait implement @task_async
+    
+    chain(async_task_a , async_task_b)
+    # chain(async_task_a , async_task_b, async_function_c_task)
 main()

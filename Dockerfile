@@ -1,5 +1,5 @@
 # use airflow image
-FROM apache/airflow
+FROM apache/airflow:latest
 
 # as root user
 USER root

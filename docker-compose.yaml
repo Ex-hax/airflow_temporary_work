@@ -11,7 +11,7 @@ services:
       - ./init-scripts/airflow:/opt/airflow/init-scripts
     environment:
       - AIRFLOW__WEBSERVER__WEB_SERVER_PORT=5000
-      - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql+psycopg2://postgres:1234@postgres:5432/airflow_db
+      - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql+psycopg2://postgres:1234@postgres:5434/airflow_db
       - AIRFLOW__WEBSERVER__SECRET_KEY=samesecret1234
       - AIRFLOW__CORE__DAGS_FOLDER=/opt/airflow/dags
       - AIRFLOW__CORE__PLUGINS_FOLDER=/opt/airflow/plugins
@@ -48,7 +48,7 @@ services:
       - ./dags:/opt/airflow/dags
       - ./plugins:/opt/airflow/plugins
     environment:
-      - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql+psycopg2://postgres:1234@postgres:5432/airflow_db
+      - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql+psycopg2://postgres:1234@postgres:5434/airflow_db
       - AIRFLOW__WEBSERVER__SECRET_KEY=samesecret1234
       - AIRFLOW__CORE__DAGS_FOLDER=/opt/airflow/dags
       - AIRFLOW__CORE__PLUGINS_FOLDER=/opt/airflow/plugins
@@ -92,8 +92,9 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: 1234
       POSTGRES_DB: airflow_db
+      PGPORT: 5434
     ports:
-      - "5432:5432"  # Mapping local port 5433 to container port 5432
+      - "5434:5434"  # Mapping local port 5433 to container port 5432
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./init-scripts/postgres/airflow:/docker-entrypoint-initdb.d

@@ -1,3 +1,3 @@
 #!/bin/bash
 
-pip install flask[async] aiohttp &
+pip install flask[async] aiohttp

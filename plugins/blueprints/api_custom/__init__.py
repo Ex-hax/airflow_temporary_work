@@ -1,1 +1,1 @@
-from blueprints.api_custom.routes import get_message
+from blueprints.api_custom.routes import external_log

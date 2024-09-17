@@ -1,1 +1,1 @@
-from blueprints.api_custom import get_message
+from blueprints.api_custom import external_log

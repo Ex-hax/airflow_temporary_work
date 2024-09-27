@@ -9,12 +9,14 @@ services:
       - ./dags:/opt/airflow/dags
       - ./plugins:/opt/airflow/plugins
       - ./init-scripts/airflow:/opt/airflow/init-scripts
+      - /var/run/docker.sock:/var/run/docker.sock
     environment:
       - AIRFLOW__WEBSERVER__WEB_SERVER_PORT=5000
       - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql+psycopg2://postgres:1234@postgres:5434/airflow_db
       - AIRFLOW__WEBSERVER__SECRET_KEY=samesecret1234
       - AIRFLOW__CORE__DAGS_FOLDER=/opt/airflow/dags
       - AIRFLOW__CORE__PLUGINS_FOLDER=/opt/airflow/plugins
+      - AIRFLOW__CORE__TEST_CONNECTION=Enabled
       - AIRFLOW__SMTP__SMTP_HOST=smtp.gmail.com
       - AIRFLOW__SMTP__SMTP_USER=watchara.c.lee@gmail.com
       - AIRFLOW__SMTP_SMTP_MAIL_FROM=watchara.c.lee@gmail.com
@@ -27,6 +29,7 @@ services:
       bash -c "
         /bin/bash /opt/airflow/init-scripts/init_database.sh
         /bin/bash /opt/airflow/init-scripts/create_admin_user.sh
+        /bin/bash /opt/airflow/init-scripts/python_install_lib.sh
         /bin/bash /opt/airflow/init-scripts/start_webserver.sh
     
         # # Check if the webserver is up before creating the admin user
@@ -47,11 +50,14 @@ services:
     volumes:
       - ./dags:/opt/airflow/dags
       - ./plugins:/opt/airflow/plugins
+      - ./init-scripts/airflow:/opt/airflow/init-scripts
+      - /var/run/docker.sock:/var/run/docker.sock 
     environment:
       - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql+psycopg2://postgres:1234@postgres:5434/airflow_db
       - AIRFLOW__WEBSERVER__SECRET_KEY=samesecret1234
       - AIRFLOW__CORE__DAGS_FOLDER=/opt/airflow/dags
       - AIRFLOW__CORE__PLUGINS_FOLDER=/opt/airflow/plugins
+      - AIRFLOW__CORE__TEST_CONNECTION=Enabled
       - AIRFLOW__SMTP__SMTP_HOST=smtp.gmail.com
       - AIRFLOW__SMTP__SMTP_USER=watchara.c.lee@gmail.com
       - AIRFLOW__SMTP_SMTP_MAIL_FROM=watchara.c.lee@gmail.com
@@ -60,7 +66,11 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-    command: ["airflow", "scheduler"]
+    command:  >
+      bash -c "
+        /bin/bash /opt/airflow/init-scripts/python_install_lib.sh &
+        airflow scheduler
+      "
 
   spark:
     image: bitnami/spark:latest

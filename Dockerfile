@@ -12,4 +12,5 @@ RUN apt-get update && apt-get install -y \
     git \
     && rm -rf /var/lib/apt/lists/*
 
-COPY ./dags/.airflowignore /opt/airflow/dags/.airflowignore
+# COPY ./dags/.airflowignore /opt/airflow/dags/.airflowignore
+USER airflow

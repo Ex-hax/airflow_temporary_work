@@ -1,1 +1,0 @@
-from blueprints.api_custom.routes import external_log

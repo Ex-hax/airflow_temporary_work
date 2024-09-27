@@ -1,1 +1,0 @@
-from blueprints.api_custom import external_log

@@ -29,14 +29,7 @@ services:
       bash -c "
         /bin/bash /opt/airflow/init-scripts/init_database.sh
         /bin/bash /opt/airflow/init-scripts/create_admin_user.sh
-        /bin/bash /opt/airflow/init-scripts/python_install_lib.sh
         /bin/bash /opt/airflow/init-scripts/start_webserver.sh
-    
-        # # Check if the webserver is up before creating the admin user
-        # while ! curl -s http://localhost:5000/health | grep -q 'healthy'; do
-        #   echo '>>>>>>>>>>>>>>>>>>>>>>>> Waiting for Airflow webserver...'
-        #   sleep 2
-        # done
         
         wait -n
 
@@ -68,7 +61,7 @@ services:
         condition: service_healthy
     command:  >
       bash -c "
-        /bin/bash /opt/airflow/init-scripts/python_install_lib.sh &
+        /bin/bash /opt/airflow/init-scripts/init_database.sh &
         airflow scheduler
       "
 

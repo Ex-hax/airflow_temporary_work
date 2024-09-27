@@ -12,5 +12,5 @@ RUN apt-get update && apt-get install -y \
     git \
     && rm -rf /var/lib/apt/lists/*
 
-# COPY ./dags/.airflowignore /opt/airflow/dags/.airflowignore
-USER airflow
+COPY ./init-scripts/airflow/python_install_lib.sh /opt/airflow/init-scripts/python_install_lib.sh
+RUN /bin/bash -c "su - airflow -c '/bin/bash /opt/airflow/init-scripts/python_install_lib.sh'"

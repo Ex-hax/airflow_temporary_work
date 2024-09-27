@@ -1,0 +1,7 @@
+services:
+  pyspark:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: docker.io/library/pyspark
+    container_name: pyspark

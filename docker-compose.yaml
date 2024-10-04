@@ -76,17 +76,17 @@ services:
       - ./spark/pyspark:/opt/bitnami/spark/work/pyspark
       - ./spark/config:/opt/bitnami/spark/work/config
 
-  jupyter:
-    image: jupyter/base-notebook
-    ports:
-      - "8888:8888"
-    volumes:
-      - ./dags:/home/jovyan/work/dags
-      - ./spark/pyspark:/home/jovyan/work/pyspark
-      - ./spark/config:/home/jovyan/work/config
-    environment:
-      JUPYTER_ENABLE_LAB: "yes"
-    command: "start-notebook.sh --NotebookApp.token=''"
+  # jupyter:
+  #   image: jupyter/base-notebook
+  #   ports:
+  #     - "8888:8888"
+  #   volumes:
+  #     - ./dags:/home/jovyan/work/dags
+  #     - ./spark/pyspark:/home/jovyan/work/pyspark
+  #     - ./spark/config:/home/jovyan/work/config
+  #   environment:
+  #     JUPYTER_ENABLE_LAB: "yes"
+  #   command: "start-notebook.sh --NotebookApp.token=''"
 
   postgres:
     image: postgres:13

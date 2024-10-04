@@ -40,6 +40,10 @@ default_args: Dict[str, Any] = {
     # 'trigger_rule': 'all_success'
 }
 
+@task
+def test_context(asofdate):
+    print(asofdate)
+
 schedule_interval = None
 @dag(
     dag_id=DAG_NAME,
@@ -49,23 +53,9 @@ schedule_interval = None
     max_active_runs=1,
     start_date=datetime(2023, 2, 8),
     catchup=False,
-    owner_links={"DataPlatform": "mailto:watchara.c@siampiwat.com"},
-    access_control={
-        "DataPlatform": ["can_read", "can_edit", "can_delete"],
-        "DataPlatformTrainee": ["can_read", "can_edit"],
-        "NOC": ["can_read", "can_edit"]
-    },
     tags=['sap','mssql','obs','dws','noc','qa','test']
 )
 def main() -> None:
-    run_pymssql_task = DockerOperator(
-        task_id='pyspark_connector_task',
-        image='registry.onesiam.com/dataengineer/airflow/dags/ax_spw_stagingdb/pyspark',  # Your Docker image name
-        api_version='auto',
-        auto_remove=True,  # Automatically remove the container after it exits
-        # command='python your_script.py',  # Command to run in the container
-        # docker_url='unix://var/run/docker.sock',  # Docker socket URL
-        network_mode='host'  # Use 'bridge' or 'host' as needed
-    )
-    chain(run_pymssql_task)
+    test_context_op = test_context('{{ ds }}')
+    chain(test_context_op)
 main()

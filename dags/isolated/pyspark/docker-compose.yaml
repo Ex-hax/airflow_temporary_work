@@ -3,5 +3,6 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: docker.io/library/pyspark
+    # image: registry.onesiam.com/dataengineer/airflow/dags/ax_spw_stagingdb/pyspark
+    image: ghcr.io/ex-hax/airflow_temporary_work/pyspark:test
     container_name: pyspark
